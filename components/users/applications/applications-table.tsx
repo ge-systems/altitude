@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle, User as UserIcon } from 'lucide-react';
+import { CheckCircle, User as UserIcon, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { verifyUserAction } from '@/actions/users/verify-user';
+import { denyApplicationAction } from '@/actions/users/deny-application';
 import { Button } from '@/components/ui/button';
 import { DataPagination } from '@/components/ui/data-pagination';
 import {
@@ -41,7 +42,7 @@ export function ApplicationsTable({
 
   const totalPages = Math.ceil(total / limit);
 
-  const { execute } = useAction(verifyUserAction, {
+  const { execute: executeVerify } = useAction(verifyUserAction, {
     onSuccess: ({ data }) => {
       if (data?.success) {
         toast.success(data.message);
@@ -51,6 +52,20 @@ export function ApplicationsTable({
     },
     onError: ({ error }) => {
       toast.error(error.serverError || 'Failed to verify user');
+      setIsLoading(null);
+    },
+  });
+
+  const { execute: executeDeny } = useAction(denyApplicationAction, {
+    onSuccess: ({ data }) => {
+      if (data?.success) {
+        toast.success(data.message);
+        router.refresh();
+      }
+      setIsLoading(null);
+    },
+    onError: ({ error }) => {
+      toast.error(error.serverError || 'Failed to deny application');
       setIsLoading(null);
     },
   });
@@ -70,7 +85,12 @@ export function ApplicationsTable({
 
   const handleVerify = (userId: string) => {
     setIsLoading(userId);
-    execute({ id: userId });
+    executeVerify({ id: userId });
+  };
+
+  const handleDeny = (userId: string) => {
+    setIsLoading(userId);
+    executeDeny({ userId });
   };
 
   return (
@@ -154,6 +174,15 @@ export function ApplicationsTable({
                       >
                         <CheckCircle className="h-4 w-4" />
                         {isLoading === user.id ? 'Accepting...' : 'Accept'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDeny(user.id)}
+                        disabled={isLoading === user.id}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {isLoading === user.id ? 'Denying...' : 'Deny'}
                       </Button>
                     </div>
                   </TableCell>

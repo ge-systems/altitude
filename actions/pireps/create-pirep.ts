@@ -33,14 +33,16 @@ const createPirepSchema = z.object({
     .max(
       MAX_CARGO_KG,
       `Cargo must be at most ${MAX_CARGO_KG.toLocaleString()} kg`
-    ),
+    )
+    .optional(),
   fuelBurned: z
     .number()
     .min(0, 'Fuel used must be non-negative')
     .max(
       MAX_FUEL_KG,
       `Fuel used must be at most ${MAX_FUEL_KG.toLocaleString()} kg`
-    ),
+    )
+    .optional(),
   multiplierId: z.string().optional(),
   aircraftId: z.string().min(1, 'Aircraft is required'),
   comments: z

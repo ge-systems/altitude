@@ -7,8 +7,8 @@ export interface PirepData {
   arrival: string;
   flightNumber: string;
   flightTime: number;
-  fuel: number;
-  cargo: number;
+  fuel?: number;
+  cargo?: number;
   submittedAt: Date;
   remarks?: string;
 }

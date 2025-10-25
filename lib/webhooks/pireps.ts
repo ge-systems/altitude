@@ -26,9 +26,15 @@ export async function sendPirepWebhook(
     `👨‍✈️ **Pilot:** ${pirepData.pilotName} (\`${fullCallsign}\`)`,
     `✈️ **Aircraft:** ${pirepData.aircraft}`,
     `⏱️ **Flight Time:** ${formatHoursMinutes(pirepData.flightTime)}`,
-    `⛽ **Fuel Used:** ${pirepData.fuel.toLocaleString()} kg`,
-    `📦 **Cargo:** ${pirepData.cargo.toLocaleString()} kg`,
   ];
+
+  if (pirepData.fuel !== undefined) {
+    lines.push(`⛽ **Fuel Used:** ${pirepData.fuel.toLocaleString()} kg`);
+  }
+
+  if (pirepData.cargo !== undefined) {
+    lines.push(`📦 **Cargo:** ${pirepData.cargo.toLocaleString()} kg`);
+  }
 
   if (pirepData.remarks) {
     lines.push(`💬 **Remarks:** ${pirepData.remarks}`);

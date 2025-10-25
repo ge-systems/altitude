@@ -190,6 +190,13 @@
       "when": 1756310907085,
       "tag": "0026_daffy_plazm",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "6",
+      "when": 1761413605376,
+      "tag": "0027_narrow_johnny_blaze",
+      "breakpoints": true
     }
   ]
 }

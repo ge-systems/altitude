@@ -74,8 +74,8 @@ const pirepFormSchema = z.object({
   flightTimeHours: z.union([z.number().min(0), z.nan()]),
   flightTimeMinutes: z.union([z.number().min(0).max(59), z.nan()]),
   aircraftId: z.string().min(1, 'Please select an aircraft.'),
-  cargo: z.number().min(0),
-  fuelBurned: z.number().min(0),
+  cargo: z.union([z.number().min(0), z.nan()]),
+  fuelBurned: z.union([z.number().min(0), z.nan()]),
   multiplierId: z.string().optional(),
   comments: z.string().optional(),
 });
@@ -511,7 +511,7 @@ export function PirepForm({ aircraft, multipliers }: PirepFormProps) {
               <FormItem>
                 <FormLabel className="flex items-center">
                   <Package className="h-4 w-4" />
-                  Cargo (kg) *
+                  Cargo (kg)
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -567,7 +567,7 @@ export function PirepForm({ aircraft, multipliers }: PirepFormProps) {
               <FormItem>
                 <FormLabel className="flex items-center">
                   <Fuel className="h-4 w-4" />
-                  Fuel Used (kg) *
+                  Fuel Used (kg)
                 </FormLabel>
                 <FormControl>
                   <Input

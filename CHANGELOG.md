@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.3](https://github.com/flyaltitudeapp/altitude/compare/0.4.2...0.4.3) (2025-10-25)
+
+### 🚀 Features
+
+- add deny application ([a997f7f](https://github.com/flyaltitudeapp/altitude/commit/a997f7f253c111b0aa88c239e0e24f636b03eede))
+- add rankup webhook to transfer flight time ([d61d6e2](https://github.com/flyaltitudeapp/altitude/commit/d61d6e272af41c5f4d5c3b322d8e0191c7ae3557))
+- make cargo and fuel fields optional when filling pirep ([8b27c6d](https://github.com/flyaltitudeapp/altitude/commit/8b27c6d83877ea59d682c52ff40c2b247bb3f7ca))
+
+### 🐛 Bug Fixes
+
+- create even button not showing ([85d42ed](https://github.com/flyaltitudeapp/altitude/commit/85d42ed7cadc2a5e37622aa2178d9ac829138358))
+- create rank button not showing ([899e9a6](https://github.com/flyaltitudeapp/altitude/commit/899e9a6e5b58139fd235c7df1005abfd25efa03e))
+
 ## [0.4.2](https://github.com/flyaltitudeapp/altitude/compare/0.4.1...0.4.2) (2025-09-07)
 
 ### 🚀 Features

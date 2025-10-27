@@ -14,6 +14,7 @@ interface UserProfileProps {
     verified: boolean;
     role: unknown;
     discordUsername?: string | null;
+    discourseUsername?: string | null;
   };
   canManageRoles: boolean;
   rankName?: string | null;
@@ -66,6 +67,11 @@ export function UserProfile({
             <p className="text-sm sm:text-base text-muted-foreground break-all text-center sm:text-left">
               {user.email}
             </p>
+            {user.discourseUsername && (
+              <p className="text-sm sm:text-base text-muted-foreground text-center sm:text-left">
+                IFC: {user.discourseUsername}
+              </p>
+            )}
             {typeof rankName === 'string' && rankName.length > 0 ? (
               <span className="rounded px-2 py-0.5 text-xs bg-panel-accent text-panel-accent-foreground dark:bg-nav-hover dark:text-panel-foreground">
                 {rankName}

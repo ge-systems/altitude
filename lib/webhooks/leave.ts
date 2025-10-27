@@ -29,6 +29,10 @@ export async function sendLeaveRequestWebhook(
     `⏰ **Submitted:** <t:${submittedTs}:R>`,
   ];
 
+  lines.push(
+    `[View Leave Request](${options.baseUrl}/admin/leave/${leaveData.id})`
+  );
+
   const embed = createDiscordEmbed({
     title: '🏖️ New Leave Request',
     description: lines.join('\n\n'),

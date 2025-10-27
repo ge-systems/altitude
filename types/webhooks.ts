@@ -24,9 +24,11 @@ export interface LeaveRequestData {
 }
 
 export interface ApplicationData {
+  userId: string;
   email: string;
   name: string;
   callsign?: number;
+  discordUsername: string;
   submittedAt: Date;
 }
 
@@ -43,4 +45,5 @@ export interface RankupData {
 export interface WebhookOptions {
   airlineName: string;
   airlineCallsign: string;
+  baseUrl?: string;
 }

@@ -50,6 +50,7 @@ type BaseSignupParams = Parameters<typeof authClient.signUp.email>[0];
 interface ExtendedSignupParams extends BaseSignupParams {
   callsign: number;
   discordUsername: string;
+  discourseUsername?: string;
 }
 
 const DEFAULT_CALLSIGN_RANGE = { min: 1, max: 999 } as const;
@@ -57,6 +58,7 @@ const CALLSIGN_CHECK_DEBOUNCE_MS = 500;
 const PASSWORD_MIN_LENGTH = 8;
 const NAME_MAX_LENGTH = 30;
 const DISCORD_USERNAME_MAX_LENGTH = 32;
+const IFC_USERNAME_MAX_LENGTH = 20;
 
 const createSignupSchema = (
   callsignMinRange: number,
@@ -104,6 +106,15 @@ const createSignupSchema = (
           /^(?=.{2,32}$)(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/,
           'Invalid Discord username format'
         ),
+      ifcUsername: z
+        .string()
+        .min(3, 'IFC username must be at least 3 characters')
+        .max(
+          IFC_USERNAME_MAX_LENGTH,
+          `IFC username must be at most ${IFC_USERNAME_MAX_LENGTH} characters`
+        )
+        .optional()
+        .or(z.literal('')),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: "Passwords don't match",
@@ -331,6 +342,7 @@ export default function SignupPage({
       confirmPassword: '',
       callsignNumber: '',
       discordUsername: '',
+      ifcUsername: '',
     },
   });
 
@@ -372,6 +384,10 @@ export default function SignupPage({
         name: data.name,
         callsign: parseInt(data.callsignNumber.toString(), 10),
         discordUsername: data.discordUsername,
+        discourseUsername:
+          data.ifcUsername && data.ifcUsername.trim() !== ''
+            ? data.ifcUsername
+            : undefined,
         callbackURL: '/',
       };
 
@@ -551,6 +567,28 @@ export default function SignupPage({
 
               <FormField
                 control={form.control}
+                name="ifcUsername"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="block text-sm font-medium text-foreground">
+                      IFC Username (Optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={formState.isSubmitting}
+                        placeholder="Enter your Infinite Flight Community username"
+                        type="text"
+                        maxLength={IFC_USERNAME_MAX_LENGTH}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
@@ -606,15 +644,6 @@ export default function SignupPage({
                   </FormItem>
                 )}
               />
-
-              {errorMessage && (
-                <p
-                  className="text-center text-destructive text-sm"
-                  role="alert"
-                >
-                  {errorMessage}
-                </p>
-              )}
 
               <Button
                 className="w-full"
@@ -785,6 +814,28 @@ export default function SignupPage({
                               const value = e.target.value.toLowerCase();
                               field.onChange(value);
                             }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="ifcUsername"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="block text-sm font-medium text-foreground">
+                          IFC Username (Optional)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            disabled={formState.isSubmitting}
+                            placeholder="Enter your Infinite Flight Community username"
+                            type="text"
+                            maxLength={IFC_USERNAME_MAX_LENGTH}
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />

@@ -57,6 +57,7 @@ export async function sendLeaveRequestWebhookNotification(
       {
         airlineName: airlineData.name,
         airlineCallsign: airlineData.callsign,
+        baseUrl: process.env.BETTER_AUTH_URL,
       }
     );
   } catch {

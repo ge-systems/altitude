@@ -8,8 +8,8 @@ import { parseAsInteger, useQueryState } from 'nuqs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { verifyUserAction } from '@/actions/users/verify-user';
 import { denyApplicationAction } from '@/actions/users/deny-application';
+import { verifyUserAction } from '@/actions/users/verify-user';
 import { Button } from '@/components/ui/button';
 import { DataPagination } from '@/components/ui/data-pagination';
 import {

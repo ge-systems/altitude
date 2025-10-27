@@ -38,6 +38,11 @@ export const auth = betterAuth({
         required: true,
         input: true,
       },
+      discourseUsername: {
+        type: 'string',
+        required: false,
+        input: true,
+      },
     },
     deleteUser: {
       enabled: true,
@@ -89,6 +94,20 @@ export const auth = betterAuth({
             }
           }
 
+          if (dbUser.discourseUsername) {
+            const existingUser = await db
+              .select()
+              .from(users)
+              .where(eq(users.discourseUsername, dbUser.discourseUsername))
+              .get();
+
+            if (existingUser) {
+              throw new APIError('BAD_REQUEST', {
+                message: 'This IFC username is already registered',
+              });
+            }
+          }
+
           // Enforce pilot callsign range at signup (staff roles are not present yet)
           if (typeof dbUser.callsign === 'number') {
             const airlineData = await db
@@ -129,14 +148,17 @@ export const auth = betterAuth({
               await sendApplicationWebhook(
                 airlineData.newApplicationsWebhookUrl,
                 {
+                  userId: user.id,
                   email: user.email,
                   name: user.name,
                   callsign: dbUser.callsign || undefined,
+                  discordUsername: dbUser.discordUsername,
                   submittedAt: new Date(),
                 },
                 {
                   airlineName: airlineData.name,
                   airlineCallsign: airlineData.callsign,
+                  baseUrl: process.env.BETTER_AUTH_URL,
                 }
               );
             }

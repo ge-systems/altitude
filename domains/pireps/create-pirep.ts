@@ -213,6 +213,7 @@ export async function sendPirepWebhookNotification(
     await sendPirepWebhook(airlineData.pirepsWebhookUrl, webhookPayload, {
       airlineName: airlineData.name,
       airlineCallsign: airlineData.callsign,
+      baseUrl: process.env.BETTER_AUTH_URL,
     });
   } catch (error) {
     throw new Error(`Failed to send PIREP webhook for ${pirepId}: ${error}`);

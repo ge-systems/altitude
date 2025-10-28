@@ -231,6 +231,7 @@ export const pireps = sqliteTable(
     flightTime: integer('flight_time', { mode: 'number' }).notNull(),
     cargo: integer('cargo', { mode: 'number' }),
     fuelBurned: integer('fuel_burned', { mode: 'number' }),
+    passengers: integer('passengers', { mode: 'number' }),
     multiplierId: text('multiplier_id').references(() => multipliers.id, {
       onDelete: 'set null',
     }),

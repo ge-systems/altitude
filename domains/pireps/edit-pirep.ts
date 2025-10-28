@@ -15,6 +15,7 @@ const editableFieldsSchema = z.object({
   flightTime: z.coerce.number().int().positive().optional(),
   cargo: z.coerce.number().int().nonnegative().optional(),
   fuelBurned: z.coerce.number().int().nonnegative().optional(),
+  passengers: z.coerce.number().int().nonnegative().optional(),
   multiplierId: z.string().optional().nullable(),
   aircraftId: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
@@ -66,6 +67,7 @@ export async function editPirep(
       flightTime: pireps.flightTime,
       cargo: pireps.cargo,
       fuelBurned: pireps.fuelBurned,
+      passengers: pireps.passengers,
       multiplierId: pireps.multiplierId,
       aircraftId: pireps.aircraftId,
       comments: pireps.comments,
@@ -159,6 +161,9 @@ export async function editPirep(
           break;
         case 'fuelBurned':
           changeDesc = `Fuel burned to ${value} kg`;
+          break;
+        case 'passengers':
+          changeDesc = `Passengers to ${value}`;
           break;
         case 'comments':
           changeDesc = value ? `Comments to "${value}"` : 'Comments cleared';

@@ -37,6 +37,7 @@ export interface DetailsCardProps {
   field?:
     | 'cargo'
     | 'fuelBurned'
+    | 'passengers'
     | 'flightTime'
     | 'comments'
     | 'multiplier'
@@ -158,12 +159,19 @@ export const DetailsCard = ({
         return;
       }
 
-      const updates: { cargo?: number; fuelBurned?: number } = {};
+      const updates: {
+        cargo?: number;
+        fuelBurned?: number;
+        passengers?: number;
+      } = {};
       if (field === 'cargo') {
         updates.cargo = num;
       }
       if (field === 'fuelBurned') {
         updates.fuelBurned = num;
+      }
+      if (field === 'passengers') {
+        updates.passengers = num;
       }
 
       execute({ id: pirepId, ...updates });

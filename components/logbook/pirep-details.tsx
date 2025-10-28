@@ -11,6 +11,7 @@ import {
   Package,
   Plane,
   Trash2,
+  Users,
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -254,7 +255,21 @@ export function PirepDetails({
         />
       </div>
 
-      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
+        <DetailsCard
+          title="Passengers"
+          value={
+            typeof pirep.passengers === 'number'
+              ? pirep.passengers.toLocaleString('en-US')
+              : '—'
+          }
+          subtitle="PAX"
+          pirepId={isEditable ? pirep.id : undefined}
+          isEditable={isEditable}
+          field={isEditable ? 'passengers' : undefined}
+          className="h-full"
+          icon={<Users className="h-4 w-4" />}
+        />
         <DetailsCard
           title="Cargo"
           value={

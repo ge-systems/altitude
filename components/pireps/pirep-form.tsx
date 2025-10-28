@@ -11,6 +11,7 @@ import {
   Plane,
   PlaneTakeoff,
   Star,
+  Users,
 } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
@@ -44,7 +45,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { MAX_CARGO_KG, MAX_FUEL_KG } from '@/lib/constants';
+import { MAX_CARGO_KG, MAX_FUEL_KG, MAX_PASSENGERS } from '@/lib/constants';
 import {
   type ActionErrorResponse,
   extractActionErrorMessage,
@@ -76,6 +77,7 @@ const pirepFormSchema = z.object({
   aircraftId: z.string().min(1, 'Please select an aircraft.'),
   cargo: z.union([z.number().min(0), z.nan()]),
   fuelBurned: z.union([z.number().min(0), z.nan()]),
+  passengers: z.union([z.number().min(0), z.nan()]),
   multiplierId: z.string().optional(),
   comments: z.string().optional(),
 });
@@ -109,6 +111,7 @@ export function PirepForm({ aircraft, multipliers }: PirepFormProps) {
       flightTimeMinutes: Number.NaN,
       cargo: Number.NaN,
       fuelBurned: Number.NaN,
+      passengers: Number.NaN,
       comments: '',
     },
   });
@@ -194,6 +197,7 @@ export function PirepForm({ aircraft, multipliers }: PirepFormProps) {
       flightTime: totalFlightTimeMinutes,
       cargo: Number.isNaN(data.cargo) ? 0 : data.cargo,
       fuelBurned: Number.isNaN(data.fuelBurned) ? 0 : data.fuelBurned,
+      passengers: Number.isNaN(data.passengers) ? 0 : data.passengers,
       multiplierId:
         data.multiplierId === 'none' ? undefined : data.multiplierId,
       aircraftId: data.aircraftId,
@@ -602,6 +606,62 @@ export function PirepForm({ aircraft, multipliers }: PirepFormProps) {
                       let value = val.replace(/[^0-9]/g, '');
                       if (value) {
                         value = Math.min(Number(value), MAX_FUEL_KG).toString();
+                        field.onChange(Number(value));
+                      } else {
+                        field.onChange(Number.NaN);
+                      }
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="passengers"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center">
+                  <Users className="h-4 w-4" />
+                  Passengers
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="150"
+                    type="text"
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    value={
+                      field.value === undefined ||
+                      field.value === null ||
+                      Number.isNaN(field.value as number)
+                        ? ''
+                        : (field.value as number)
+                    }
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === '-' ||
+                        e.key === '+' ||
+                        e.key === 'e' ||
+                        e.key === '.'
+                      ) {
+                        e.preventDefault();
+                      }
+                    }}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        field.onChange(Number.NaN);
+                        return;
+                      }
+                      let value = val.replace(/[^0-9]/g, '');
+                      if (value) {
+                        value = Math.min(
+                          Number(value),
+                          MAX_PASSENGERS
+                        ).toString();
                         field.onChange(Number(value));
                       } else {
                         field.onChange(Number.NaN);

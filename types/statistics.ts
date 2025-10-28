@@ -59,14 +59,12 @@ export type PeriodComparison = {
   };
 };
 
-// New types for tabs functionality
 export type PilotStatistics = {
   totalRegistered: number;
   activeThisPeriod: number;
   inactiveCount: number;
   activityRate: number;
   registrationTrend: TimeSeriesDataPoint[];
-  // topPilots removed
 };
 
 export type FlightStatistics = {

@@ -8,7 +8,7 @@ import {
   createPirep,
   sendPirepWebhookNotification,
 } from '@/domains/pireps/create-pirep';
-import { MAX_CARGO_KG, MAX_FUEL_KG } from '@/lib/constants';
+import { MAX_CARGO_KG, MAX_FUEL_KG, MAX_PASSENGERS } from '@/lib/constants';
 import { extractErrorMessage } from '@/lib/error-handler';
 import { authActionClient } from '@/lib/safe-action';
 
@@ -41,6 +41,14 @@ const createPirepSchema = z.object({
     .max(
       MAX_FUEL_KG,
       `Fuel used must be at most ${MAX_FUEL_KG.toLocaleString()} kg`
+    )
+    .optional(),
+  passengers: z
+    .number()
+    .min(0, 'Passengers must be non-negative')
+    .max(
+      MAX_PASSENGERS,
+      `Passengers must be at most ${MAX_PASSENGERS.toLocaleString()}`
     )
     .optional(),
   multiplierId: z.string().optional(),

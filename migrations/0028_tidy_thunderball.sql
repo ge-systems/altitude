@@ -1,0 +1,1 @@
+ALTER TABLE `pireps` ADD `passengers` integer;

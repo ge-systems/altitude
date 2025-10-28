@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/flyaltitudeapp/altitude/compare/0.4.3...0.4.4) (2025-10-28)
+
+### 🚀 Features
+
+- add IFC username to login page ([5e2b608](https://github.com/flyaltitudeapp/altitude/commit/5e2b6083010e95c73e4ba902936435e2f48ece04))
+- add pax number to pirep form ([4032d41](https://github.com/flyaltitudeapp/altitude/commit/4032d4103170cdb782edf8ce225e03e5751bf367))
+
 ## [0.4.3](https://github.com/flyaltitudeapp/altitude/compare/0.4.2...0.4.3) (2025-10-25)
 
 ### 🚀 Features

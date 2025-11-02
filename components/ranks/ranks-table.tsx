@@ -1,15 +1,19 @@
 'use client';
 
-import { MoreHorizontal, Tags } from 'lucide-react';
+import { MoreHorizontal, Tags, Trash } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
 import { parseAsInteger, useQueryState } from 'nuqs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteRankAction } from '@/actions/ranks/delete-rank';
+import {
+  deleteBulkRanksAction,
+  deleteRankAction,
+} from '@/actions/ranks/delete-rank';
 import { getRankAircraftAction } from '@/actions/ranks/get-rank-aircraft';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DataPagination } from '@/components/ui/data-pagination';
 import {
   Dialog,
@@ -56,7 +60,7 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
   const router = useRouter();
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
   const { dialogStyles } = useResponsiveDialog({
-    maxWidth: 'sm:max-w-[500px]',
+    maxWidth: 'sm:max-w-[420px]',
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [rankToDelete, setRankToDelete] = useState<Rank | null>(null);
@@ -64,17 +68,37 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
   const [rankToEdit, setRankToEdit] = useState<Rank | null>(null);
   const [editAircraftIds, setEditAircraftIds] = useState<string[]>([]);
   const [editAllowAllAircraft, setEditAllowAllAircraft] = useState(false);
+  const [selectedRankIds, setSelectedRankIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
 
   const { execute: deleteRank, isExecuting } = useAction(deleteRankAction, {
     onSuccess: ({ data }) => {
       toast.success(data?.message || 'Rank deleted successfully');
       setDeleteDialogOpen(false);
       setRankToDelete(null);
+      setSelectedRankIds(new Set());
     },
     onError: ({ error }) => {
       toast.error(error.serverError || 'Failed to delete rank');
     },
   });
+
+  const { execute: deleteBulkRanks, isExecuting: isBulkDeleting } = useAction(
+    deleteBulkRanksAction,
+    {
+      onSuccess: ({ data }) => {
+        toast.success(data?.message || 'Ranks deleted successfully');
+        setDeleteDialogOpen(false);
+        setSelectedRankIds(new Set());
+        setIsBulkDelete(false);
+      },
+      onError: ({ error }) => {
+        toast.error(error.serverError || 'Failed to delete ranks');
+      },
+    }
+  );
 
   const { execute: fetchRankAircraft } = useAction(getRankAircraftAction, {
     onSuccess: ({ data }) => {
@@ -97,11 +121,22 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
 
   const handleDeleteClick = (rank: Rank) => {
     setRankToDelete(rank);
+    setIsBulkDelete(false);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleBulkDeleteClick = () => {
+    if (selectedRankIds.size === 0) {
+      return;
+    }
+    setIsBulkDelete(true);
     setDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = () => {
-    if (rankToDelete) {
+    if (isBulkDelete) {
+      deleteBulkRanks({ ids: Array.from(selectedRankIds) });
+    } else if (rankToDelete) {
       deleteRank({ id: rankToDelete.id });
     }
   };
@@ -110,6 +145,28 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
     setDeleteDialogOpen(false);
     setRankToDelete(null);
   };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRankIds(new Set(ranks.map((r) => r.id)));
+    } else {
+      setSelectedRankIds(new Set());
+    }
+  };
+
+  const handleSelectRank = (rankId: string, checked: boolean) => {
+    const newSelected = new Set(selectedRankIds);
+    if (checked) {
+      newSelected.add(rankId);
+    } else {
+      newSelected.delete(rankId);
+    }
+    setSelectedRankIds(newSelected);
+  };
+
+  const allSelected =
+    ranks.length > 0 && ranks.every((r) => selectedRankIds.has(r.id));
+  const someSelected = ranks.some((r) => selectedRankIds.has(r.id));
 
   const handleEditClick = (rank: Rank) => {
     setRankToEdit({ ...rank });
@@ -125,10 +182,40 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
 
   return (
     <>
+      {someSelected && (
+        <div className="mb-4 flex flex-col gap-3 rounded-md border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-foreground">
+              {selectedRankIds.size} rank{selectedRankIds.size === 1 ? '' : 's'}{' '}
+              selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDeleteClick}
+              disabled={isExecuting || isBulkDeleting}
+              className="flex w-full items-center justify-center gap-2 sm:w-auto"
+            >
+              <Trash className="h-4 w-4" />
+              Delete All
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-hidden rounded-md border border-border bg-panel shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px] bg-muted/50">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                  disabled={isExecuting || isBulkDeleting}
+                />
+              </TableHead>
               <TableHead className="bg-muted/50 font-semibold text-foreground">
                 Rank Name
               </TableHead>
@@ -160,6 +247,15 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
                   className="transition-colors hover:bg-muted/30"
                   key={rank.id}
                 >
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedRankIds.has(rank.id)}
+                      onCheckedChange={(checked) =>
+                        handleSelectRank(rank.id, checked as boolean)
+                      }
+                      disabled={isExecuting || isBulkDeleting}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium text-foreground">
                     {rank.name}
                   </TableCell>
@@ -213,20 +309,24 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
           className={dialogStyles.className}
           style={dialogStyles.style}
           showCloseButton
+          transitionFrom="bottom-left"
         >
           <DialogHeader>
-            <DialogTitle className="text-foreground">Delete Rank</DialogTitle>
+            <DialogTitle className="text-foreground">
+              Delete {isBulkDelete ? 'Ranks' : 'Rank'}
+            </DialogTitle>
             <DialogDescription className="text-foreground">
-              Are you sure you want to delete &quot;{rankToDelete?.name}
-              &quot;? This action cannot be undone.
+              {isBulkDelete
+                ? `Are you sure you want to delete ${selectedRankIds.size} rank${selectedRankIds.size === 1 ? '' : 's'}? This action cannot be undone.`
+                : `Are you sure you want to delete "${rankToDelete?.name}"? This action cannot be undone.`}
             </DialogDescription>
           </DialogHeader>
           <ResponsiveDialogFooter
             primaryButton={{
-              label: isExecuting ? 'Deleting...' : 'Delete',
+              label: isExecuting || isBulkDeleting ? 'Deleting...' : 'Delete',
               onClick: handleConfirmDelete,
-              disabled: isExecuting,
-              loading: isExecuting,
+              disabled: isExecuting || isBulkDeleting,
+              loading: isExecuting || isBulkDeleting,
               loadingLabel: 'Deleting...',
               className:
                 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
@@ -234,7 +334,7 @@ export function RanksTable({ ranks, total, limit = 10 }: RanksTableProps) {
             secondaryButton={{
               label: 'Cancel',
               onClick: handleCancelDelete,
-              disabled: isExecuting,
+              disabled: isExecuting || isBulkDeleting,
             }}
           />
         </DialogContent>

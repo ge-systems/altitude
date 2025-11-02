@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { handleAdminAccountCreation } from '@/domains/setup/create-admin-account';
 import { extractDbErrorMessage } from '@/lib/db-error';
 import { actionClient } from '@/lib/safe-action';
+import { discordUsernameRegex } from '@/lib/validation/account';
 
 const createAdminAccountSchema = z.object({
   email: z
@@ -16,12 +17,7 @@ const createAdminAccountSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   discordUsername: z
     .string()
-    .min(2, 'Discord username must be at least 2 characters')
-    .max(32, 'Discord username must be at most 32 characters')
-    .regex(
-      /^(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/,
-      'Invalid Discord username format'
-    ),
+    .regex(discordUsernameRegex, 'Invalid Discord username format'),
 });
 
 export const createAdminAccountAction = actionClient

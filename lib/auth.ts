@@ -17,6 +17,7 @@ import {
 } from '@/db/schema';
 import { sendPasswordResetEmail } from '@/lib/email-utils';
 import { ADMIN_ROLE, OWNER_ROLE } from '@/lib/roles';
+import { discordUsernameRegex } from '@/lib/validation/account';
 import { sendApplicationWebhook } from '@/lib/webhooks/applications';
 
 export const auth = betterAuth({
@@ -85,9 +86,7 @@ export const auth = betterAuth({
           const dbUser = user as unknown as DbUser;
 
           if (dbUser.discordUsername) {
-            const discordRegex =
-              /^(?=.{2,32}$)(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/;
-            if (!discordRegex.test(dbUser.discordUsername)) {
+            if (!discordUsernameRegex.test(dbUser.discordUsername)) {
               throw new APIError('BAD_REQUEST', {
                 message: 'Invalid Discord username format',
               });

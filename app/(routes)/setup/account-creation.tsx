@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { createAdminAccountAction } from '@/actions/setup/create-admin-account';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { discordUsernameRegex } from '@/lib/validation/account';
 
 const accountCreationSchema = z
   .object({
@@ -20,12 +21,7 @@ const accountCreationSchema = z
       .pipe(z.email('Invalid email format')),
     discordUsername: z
       .string()
-      .min(2, 'Discord username must be at least 2 characters')
-      .max(32, 'Discord username must be at most 32 characters')
-      .regex(
-        /^(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/,
-        'Invalid Discord username format'
-      ),
+      .regex(discordUsernameRegex, 'Invalid Discord username format'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
     confirmPassword: z.string().min(1, 'Please confirm your password'),
   })

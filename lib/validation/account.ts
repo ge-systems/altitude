@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-export const discordUsernameRegex =
-  /^(?=.{2,32}$)(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/;
+export const discordUsernameRegex = /^(?=.{2,32}$)(?!.*\.\.)[a-z0-9._]+$/;
 
 export const emptyStringToUndefined = (val: unknown) =>
   typeof val === 'string' && val.trim() === '' ? undefined : val;

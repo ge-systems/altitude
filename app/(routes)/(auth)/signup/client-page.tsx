@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
+import { discordUsernameRegex } from '@/lib/validation/account';
 
 interface Airline {
   id: string;
@@ -98,14 +99,7 @@ const createSignupSchema = (
       discordUsername: z
         .string()
         .min(1, 'Discord username is required')
-        .max(
-          DISCORD_USERNAME_MAX_LENGTH,
-          `Discord username must be at most ${DISCORD_USERNAME_MAX_LENGTH} characters`
-        )
-        .regex(
-          /^(?=.{2,32}$)(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/,
-          'Invalid Discord username format'
-        ),
+        .regex(discordUsernameRegex, 'Invalid Discord username format'),
       ifcUsername: z
         .string()
         .min(3, 'IFC username must be at least 3 characters')

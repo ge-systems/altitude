@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useSession } from '@/lib/auth-client';
 import { formatFullCallsign } from '@/lib/utils';
+import { discordUsernameRegex } from '@/lib/validation/account';
 
 import { DangerZone } from './danger-zone';
 import { PasswordForm } from './password-form';
@@ -62,10 +63,7 @@ const formSchema = z.object({
       z
         .string()
         .refine(
-          (val) =>
-            /^(?=.{2,32}$)(?!.*[._]{2})(?!.*[_.]{2})(?!.*[_.]$)(?!^[_.])[a-z0-9._]+$/.test(
-              val
-            ),
+          (val) => discordUsernameRegex.test(val),
           'Invalid Discord username format'
         )
         .nullable()

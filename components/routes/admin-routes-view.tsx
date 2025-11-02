@@ -1,12 +1,15 @@
 'use client';
 
-import { Map, MoreHorizontal, Plus, Upload } from 'lucide-react';
+import { Map, MoreHorizontal, Plus, Trash, Upload } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteRouteAction } from '@/actions/routes/delete-route';
+import {
+  deleteBulkRoutesAction,
+  deleteRouteAction,
+} from '@/actions/routes/delete-route';
 import { fetchRoutesAction } from '@/actions/routes/search-routes';
 import { ActiveFilters } from '@/components/routes/active-filters';
 import CreateRouteDialog from '@/components/routes/create-route-dialog';
@@ -15,6 +18,7 @@ import ImportRoutesDialog from '@/components/routes/import-routes-dialog';
 import type { FilterCondition } from '@/components/routes/route-filters-bar';
 import { RouteFiltersBar } from '@/components/routes/route-filters-bar';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DataPagination } from '@/components/ui/data-pagination';
 import {
   Dialog,
@@ -105,7 +109,7 @@ export function AdminRoutesView({
 }: AdminRoutesViewProps) {
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
   const { dialogStyles } = useResponsiveDialog({
-    maxWidth: 'sm:max-w-[500px]',
+    maxWidth: 'sm:max-w-[420px]',
   });
 
   const { filters: filtersFromParams, setFilters } = useRouteFilterParams();
@@ -121,6 +125,10 @@ export function AdminRoutesView({
   const [routeToDelete, setRouteToDelete] = useState<RouteItem | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [routeToEdit, setRouteToEdit] = useState<RouteItem | null>(null);
+  const [selectedRouteIds, setSelectedRouteIds] = useState<Set<string>>(
+    new Set()
+  );
+  const [isBulkDelete, setIsBulkDelete] = useState(false);
 
   const totalPages = Math.ceil(totalState / limit);
 
@@ -156,11 +164,29 @@ export function AdminRoutesView({
         toast.success(data?.message || 'Route deleted');
         setDeleteDialogOpen(false);
         setRouteToDelete(null);
+        setSelectedRouteIds(new Set());
         // Refresh the routes after deletion
         fetchRoutes({ page, limit, filters: filtersFromParams });
       },
       onError: ({ error }) => {
         toast.error(error.serverError || 'Failed to delete route');
+      },
+    }
+  );
+
+  const { execute: deleteBulkRoutes, isExecuting: isBulkDeleting } = useAction(
+    deleteBulkRoutesAction,
+    {
+      onSuccess: ({ data }) => {
+        toast.success(data?.message || 'Routes deleted');
+        setDeleteDialogOpen(false);
+        setSelectedRouteIds(new Set());
+        setIsBulkDelete(false);
+        // Refresh the routes after deletion
+        fetchRoutes({ page, limit, filters: filtersFromParams });
+      },
+      onError: ({ error }) => {
+        toast.error(error.serverError || 'Failed to delete routes');
       },
     }
   );
@@ -172,14 +198,48 @@ export function AdminRoutesView({
 
   const handleDeleteClick = (route: RouteItem) => {
     setRouteToDelete(route);
+    setIsBulkDelete(false);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleBulkDeleteClick = () => {
+    if (selectedRouteIds.size === 0) {
+      return;
+    }
+    setIsBulkDelete(true);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
-    if (routeToDelete) {
+    if (isBulkDelete) {
+      deleteBulkRoutes({ ids: Array.from(selectedRouteIds) });
+    } else if (routeToDelete) {
       deleteRoute({ id: routeToDelete.id });
     }
   };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedRouteIds(new Set(routesState.map((r) => r.id)));
+    } else {
+      setSelectedRouteIds(new Set());
+    }
+  };
+
+  const handleSelectRoute = (routeId: string, checked: boolean) => {
+    const newSelected = new Set(selectedRouteIds);
+    if (checked) {
+      newSelected.add(routeId);
+    } else {
+      newSelected.delete(routeId);
+    }
+    setSelectedRouteIds(newSelected);
+  };
+
+  const allSelected =
+    routesState.length > 0 &&
+    routesState.every((r) => selectedRouteIds.has(r.id));
+  const someSelected = routesState.some((r) => selectedRouteIds.has(r.id));
 
   const handleEditClick = (route: RouteItem) => {
     setRouteToEdit(route);
@@ -197,7 +257,7 @@ export function AdminRoutesView({
             Create and manage flight routes for your airline&apos;s network
           </p>
         </div>
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <div className="flex items-center gap-2">
             <RouteFiltersBar
               aircraft={aircraft}
@@ -251,11 +311,41 @@ export function AdminRoutesView({
         onEditFilter={handleEditFilter}
       />
 
+      {someSelected && (
+        <div className="flex flex-col gap-3 rounded-md border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-foreground">
+              {selectedRouteIds.size} route
+              {selectedRouteIds.size === 1 ? '' : 's'} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBulkDeleteClick}
+              disabled={isDeleting || isBulkDeleting}
+              className="flex w-full items-center justify-center gap-2 sm:w-auto"
+            >
+              <Trash className="h-4 w-4" />
+              Delete All
+            </Button>
+          </div>
+        </div>
+      )}
+
       <section className="space-y-4">
         <div className="overflow-hidden rounded-md border border-border bg-panel shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[50px] bg-muted/50">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={handleSelectAll}
+                    disabled={isDeleting || isBulkDeleting}
+                  />
+                </TableHead>
                 <TableHead className="bg-muted/50 font-semibold text-foreground">
                   Flight Numbers
                 </TableHead>
@@ -276,7 +366,7 @@ export function AdminRoutesView({
                 <TableRow>
                   <TableCell
                     className="px-6 py-12 text-center text-foreground"
-                    colSpan={5}
+                    colSpan={6}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Map className="h-8 w-8 text-foreground" />
@@ -290,6 +380,15 @@ export function AdminRoutesView({
                     key={route.id}
                     className="transition-colors hover:bg-muted/30"
                   >
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedRouteIds.has(route.id)}
+                        onCheckedChange={(checked) =>
+                          handleSelectRoute(route.id, checked as boolean)
+                        }
+                        disabled={isDeleting || isBulkDeleting}
+                      />
+                    </TableCell>
                     <TableCell className="text-foreground">
                       <div className="flex flex-wrap gap-1">
                         {(() => {
@@ -373,19 +472,24 @@ export function AdminRoutesView({
           className={dialogStyles.className}
           style={dialogStyles.style}
           showCloseButton
+          transitionFrom="top-right"
         >
           <DialogHeader>
-            <DialogTitle className="text-foreground">Delete Route</DialogTitle>
+            <DialogTitle className="text-foreground">
+              Delete {isBulkDelete ? 'Routes' : 'Route'}
+            </DialogTitle>
             <DialogDescription className="text-foreground">
-              Are you sure you want to delete this route?
+              {isBulkDelete
+                ? `Are you sure you want to delete ${selectedRouteIds.size} route${selectedRouteIds.size === 1 ? '' : 's'}? This action cannot be undone.`
+                : 'Are you sure you want to delete this route?'}
             </DialogDescription>
           </DialogHeader>
           <ResponsiveDialogFooter
             primaryButton={{
-              label: isDeleting ? 'Deleting...' : 'Delete',
+              label: isDeleting || isBulkDeleting ? 'Deleting...' : 'Delete',
               onClick: confirmDelete,
-              disabled: isDeleting,
-              loading: isDeleting,
+              disabled: isDeleting || isBulkDeleting,
+              loading: isDeleting || isBulkDeleting,
               loadingLabel: 'Deleting...',
               className:
                 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
@@ -393,7 +497,7 @@ export function AdminRoutesView({
             secondaryButton={{
               label: 'Cancel',
               onClick: () => setDeleteDialogOpen(false),
-              disabled: isDeleting,
+              disabled: isDeleting || isBulkDeleting,
             }}
           />
         </DialogContent>

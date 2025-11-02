@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.5](https://github.com/flyaltitudeapp/altitude/compare/0.4.4...0.4.5) (2025-11-02)
+
+### 🚀 Features
+
+- add bulk update to multipliers ([0c2aeb7](https://github.com/flyaltitudeapp/altitude/commit/0c2aeb7f03e915c292435e3f7829504be279484a))
+- add bulk update to ranks/fleet ([51cbdf9](https://github.com/flyaltitudeapp/altitude/commit/51cbdf95892dd1ab2c0de9d5e3fb9e492f161b6f))
+- add update password script ([cca6cf4](https://github.com/flyaltitudeapp/altitude/commit/cca6cf4ecc589a53cc0545f76db15fa09a96680c))
+- restrict bulk deletion UI to owners and admins ([c785e8e](https://github.com/flyaltitudeapp/altitude/commit/c785e8e2554d2a9423fa7d5c9535ea505fb8d8b9))
+
+### 🐛 Bug Fixes
+
+- new discord username regex ([2114c46](https://github.com/flyaltitudeapp/altitude/commit/2114c46fadae364c10f699cee0b98fc18c3529b2))
+
+### 🔧 Chores
+
+- update to latest bun version ([746aa28](https://github.com/flyaltitudeapp/altitude/commit/746aa282aaaa4cbc1e5cde73107b0fc562fbd667))
+- update to nextjs16 ([8499c3f](https://github.com/flyaltitudeapp/altitude/commit/8499c3f2ede86ce47f2b562a244ba5ed5abb1993))
+
 ## [0.4.4](https://github.com/flyaltitudeapp/altitude/compare/0.4.3...0.4.4) (2025-10-28)
 
 ### 🚀 Features

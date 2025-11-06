@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.6](https://github.com/flyaltitudeapp/altitude/compare/0.4.5...0.4.6) (2025-11-06)
+
+### 🐛 Bug Fixes
+
+- delete all routes ([f72ea34](https://github.com/flyaltitudeapp/altitude/commit/f72ea341fd7dc7aa1523cbcec86c19e860b4d4ba))
+
 ## [0.4.5](https://github.com/flyaltitudeapp/altitude/compare/0.4.4...0.4.5) (2025-11-02)
 
 ### 🚀 Features

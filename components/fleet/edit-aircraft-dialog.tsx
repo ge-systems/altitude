@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAction } from 'next-safe-action/hooks';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -108,9 +108,21 @@ export default function EditAircraftDialog({
     execute({ id: aircraft.id, ...data });
   };
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: aircraft.name,
+        livery: aircraft.livery,
+      });
+    }
+  }, [aircraft.id, aircraft.livery, aircraft.name, form, open]);
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      form.reset();
+      form.reset({
+        name: aircraft.name,
+        livery: aircraft.livery,
+      });
     }
     onOpenChange(newOpen);
   };

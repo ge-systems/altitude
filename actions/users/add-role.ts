@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { addRole } from '@/domains/users/add-role';
 import { handleDbError } from '@/lib/db-error';
-import { ASSIGNABLE_ROLES } from '@/lib/roles';
+import { ADMIN_ROLE, ASSIGNABLE_ROLES, OWNER_ROLE } from '@/lib/roles';
 import { createRoleActionClient } from '@/lib/safe-action';
 
 const addRoleSchema = z.object({
@@ -17,8 +17,17 @@ const addRoleSchema = z.object({
 
 export const addRoleAction = createRoleActionClient(['users'])
   .inputSchema(addRoleSchema)
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const { userId, role } = parsedInput;
+
+    if (role === ADMIN_ROLE) {
+      const callerIsOwner = Array.isArray(ctx.userRoles)
+        ? ctx.userRoles.includes(OWNER_ROLE)
+        : false;
+      if (!callerIsOwner) {
+        throw new Error('Only the owner can grant the admin role');
+      }
+    }
 
     try {
       const result = await addRole({ userId, role });

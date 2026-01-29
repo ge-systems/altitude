@@ -14,7 +14,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useSession } from '@/lib/auth-client';
-import { ASSIGNABLE_ROLES, type AssignableRole } from '@/lib/roles';
+import {
+  ADMIN_ROLE,
+  ASSIGNABLE_ROLES,
+  type AssignableRole,
+  normalizeRoles,
+  OWNER_ROLE,
+} from '@/lib/roles';
 
 interface AddRoleDropdownProps {
   userId: string;
@@ -27,11 +33,17 @@ export function AddRoleDropdown({
 }: AddRoleDropdownProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const { refetch } = useSession();
+  const { data: session, refetch } = useSession();
+
+  const sessionRoles = normalizeRoles(
+    (session?.user as { role?: string[] | string | null } | undefined)?.role ??
+      null
+  );
+  const isOwner = sessionRoles.includes(OWNER_ROLE);
 
   const remainingRoles = ASSIGNABLE_ROLES.filter(
     (r) => !currentRoles.includes(r)
-  );
+  ).filter((role) => (role === ADMIN_ROLE ? isOwner : true));
 
   const { execute } = useAction(addRoleAction, {
     onSuccess: async ({ data }) => {

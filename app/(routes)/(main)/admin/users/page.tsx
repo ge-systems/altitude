@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import { AdminPage } from '@/components/admin/admin-page';
-import { AdminSearchBar } from '@/components/admin/admin-search-bar';
+import { UsersFilters } from '@/components/users/users-filters';
 import { UsersTable } from '@/components/users/users-table';
 import { getAirline, getUsersPaginated } from '@/db/queries';
 import { requireRole } from '@/lib/auth-check';
@@ -17,16 +17,20 @@ interface UsersPageProps {
   searchParams?: Promise<{
     page?: string;
     q?: string;
+    inactive?: string;
   }>;
 }
 
 export default async function UsersPage({ searchParams }: UsersPageProps) {
   await requireRole(['users']);
 
-  const { page, search, limit } = await parsePaginationParams(searchParams);
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const { page, search, limit } =
+    await parsePaginationParams(resolvedSearchParams);
+  const hideInactive = resolvedSearchParams.inactive === 'true';
 
   const [usersResult, airline] = await Promise.all([
-    getUsersPaginated(page, limit, search),
+    getUsersPaginated(page, limit, search, { hideInactive }),
     getAirline(),
   ]);
 
@@ -36,7 +40,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     <AdminPage
       title="Users"
       description="Manage your pilots and their account information"
-      searchBar={<AdminSearchBar placeholder="Search users..." />}
+      searchBar={<UsersFilters />}
       createDialog={<></>}
       table={
         airline && (

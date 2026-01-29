@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { airline, leaveRequests, pireps, type User, users } from '@/db/schema';
@@ -40,18 +40,14 @@ function createLastFlightSubquery() {
 /**
  * Create inactivity where condition
  */
-function createInactivityWhereCondition(
-  searchCondition: ReturnType<typeof sql<boolean>>,
+function createInactiveUsersCondition(
   nowSeconds: number,
   daysAgoSeconds: number
 ) {
   return sql<boolean>`
-    ${searchCondition}
-    AND EXISTS (
-      SELECT 1 FROM ${pireps} p_any
-      WHERE p_any.user_id = ${users.id}
-    )
-    AND NOT EXISTS (
+    ${users.banned} = 0
+    AND
+    NOT EXISTS (
       SELECT 1 FROM ${pireps} p
       WHERE p.user_id = ${users.id}
         AND p.status IN ('approved', 'pending')
@@ -96,6 +92,10 @@ async function getInactiveUsersPaginated(
     : sql<boolean>`1 = 1`;
 
   const lastFlightSubquery = createLastFlightSubquery();
+  const inactiveCondition = createInactiveUsersCondition(
+    nowSeconds,
+    daysAgoSeconds
+  );
 
   const result = await db
     .select({
@@ -110,13 +110,7 @@ async function getInactiveUsersPaginated(
     .from(users)
     .leftJoin(lastFlightSubquery, eq(users.id, lastFlightSubquery.userId))
     .innerJoin(airline, sql`1 = 1`)
-    .where(
-      createInactivityWhereCondition(
-        searchCondition,
-        nowSeconds,
-        daysAgoSeconds
-      )
-    )
+    .where(and(searchCondition, inactiveCondition))
     .orderBy(
       sql`COALESCE(${lastFlightSubquery.lastFlight}, 0) DESC`,
       users.name
@@ -136,6 +130,10 @@ async function getInactiveUsersPaginated(
 async function getAllInactiveUsers(): Promise<InactiveUserOutput[]> {
   const { nowSeconds, daysAgoSeconds } = await getInactivityTimeframe();
   const lastFlightSubquery = createLastFlightSubquery();
+  const inactiveCondition = createInactiveUsersCondition(
+    nowSeconds,
+    daysAgoSeconds
+  );
 
   const result = await db
     .select({
@@ -149,13 +147,7 @@ async function getAllInactiveUsers(): Promise<InactiveUserOutput[]> {
     .from(users)
     .leftJoin(lastFlightSubquery, eq(users.id, lastFlightSubquery.userId))
     .innerJoin(airline, sql`1 = 1`)
-    .where(
-      createInactivityWhereCondition(
-        sql<boolean>`1 = 1`,
-        nowSeconds,
-        daysAgoSeconds
-      )
-    )
+    .where(inactiveCondition)
     .orderBy(
       sql`COALESCE(${lastFlightSubquery.lastFlight}, 0) DESC`,
       users.name
@@ -164,4 +156,9 @@ async function getAllInactiveUsers(): Promise<InactiveUserOutput[]> {
   return result as InactiveUserOutput[];
 }
 
-export { getAllInactiveUsers, getInactiveUsersPaginated };
+export {
+  createInactiveUsersCondition,
+  getAllInactiveUsers,
+  getInactiveUsersPaginated,
+  getInactivityTimeframe,
+};

@@ -3,7 +3,7 @@
   "version": "0.4.7",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "bunx --bun next dev --turbopack",
     "build": "bunx --bun next build",
     "start": "bunx --bun next start",
     "cron": "bun run jobs/scheduler.ts",

@@ -1,4 +1,7 @@
-import { parse } from 'csv-parse/sync';
+import { Readable } from 'node:stream';
+import type { ReadableStream as WebReadableStream } from 'node:stream/web';
+
+import { parse } from 'csv-parse';
 import { and, eq, or } from 'drizzle-orm';
 import { z } from 'zod';
 
@@ -26,18 +29,24 @@ const csvRowSchema = z.object({
 export async function importRoutesFromCsv(
   file: File
 ): Promise<{ created: number; skipped: number; total: number }> {
-  const text = await file.text();
-  const records = parse(text, {
+  const parser = parse({
     columns: true,
     skip_empty_lines: true,
     trim: true,
-  }) as unknown;
-
-  const rows = z.array(csvRowSchema).parse(records);
+  });
+  const stream = Readable.fromWeb(
+    file.stream() as unknown as WebReadableStream
+  );
+  const records = stream.pipe(parser);
 
   let createdCount = 0;
   let skippedCount = 0;
-  for (const row of rows) {
+  let totalCount = 0;
+  let batchCount = 0;
+  for await (const record of records) {
+    totalCount += 1;
+    batchCount += 1;
+    const row = csvRowSchema.parse(record);
     const flightNumbers = row.flight_numbers
       ? row.flight_numbers
           .split(';')
@@ -192,7 +201,14 @@ export async function importRoutesFromCsv(
       flightNumbers,
     });
     createdCount += 1;
+
+    if (batchCount >= 200) {
+      batchCount = 0;
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+    }
   }
 
-  return { created: createdCount, skipped: skippedCount, total: rows.length };
+  return { created: createdCount, skipped: skippedCount, total: totalCount };
 }

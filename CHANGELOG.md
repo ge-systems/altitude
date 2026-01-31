@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/flyaltitudeapp/altitude/compare/0.4.7...0.5.0) (2026-01-31)
+
+### 🚀 Features
+
+- add hide inactive users toggle ([9ea88d9](https://github.com/flyaltitudeapp/altitude/commit/9ea88d95486a4b1ede0d9393f653ae1ccc33a78b))
+- fix staff being able to make themselves admin ([9f270f4](https://github.com/flyaltitudeapp/altitude/commit/9f270f47875657324cfc72013ce21d7c10c683cc))
+- update user management messages and improve ban/kick functionality ([d20c30c](https://github.com/flyaltitudeapp/altitude/commit/d20c30c17e22282accf5045503879422663d97b5))
+
+### 🐛 Bug Fixes
+
+- add batching to csv upload ([071bdb1](https://github.com/flyaltitudeapp/altitude/commit/071bdb11e63a5bc6b012d20855c6d7401f597ecb))
+- reset form values on dialog open ([048b185](https://github.com/flyaltitudeapp/altitude/commit/048b18515209c1ce3dc4d02f72caf0aa139f51e0))
+
 ## [0.4.7](https://github.com/flyaltitudeapp/altitude/compare/0.4.6...0.4.7) (2026-01-18)
 
 ### 🐛 Bug Fixes

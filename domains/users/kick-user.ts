@@ -17,15 +17,15 @@ export async function kickUser(userId: string, actorRoles: string[]) {
 
   const targetRoles = parseRolesField(existingUser[0].role);
 
-  // No one can kick the owner
+  // No one can delete the owner
   if (targetRoles.includes(OWNER_ROLE)) {
-    throw new Error("You can't remove the owner");
+    throw new Error("You can't delete the owner");
   }
 
-  // Only the owner can kick admins
+  // Only the owner can delete admins
   const actorIsOwner = actorRoles.includes(OWNER_ROLE);
   if (targetRoles.includes(ADMIN_ROLE) && !actorIsOwner) {
-    throw new Error('Only the owner can remove admins');
+    throw new Error('Only the owner can delete admins');
   }
 
   await db.delete(users).where(eq(users.id, userId));

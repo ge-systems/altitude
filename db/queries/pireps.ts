@@ -55,7 +55,7 @@ async function getUserLastFlights(userId: string): Promise<Pirep[]> {
     .select()
     .from(pireps)
     .where(eq(pireps.userId, userId))
-    .orderBy(desc(pireps.createdAt))
+    .orderBy(desc(pireps.date))
     .limit(5);
 }
 

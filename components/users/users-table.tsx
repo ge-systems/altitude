@@ -22,7 +22,9 @@ import { Airline } from '@/db/schema';
 
 interface UsersTableProps {
   airline: Airline;
-  users: Array<User & { isInactive?: boolean | number }>;
+  users: Array<
+    User & { isInactive?: boolean | number; lastFlight?: number | null }
+  >;
   total: number;
   limit?: number;
 }
@@ -51,12 +53,17 @@ export function UsersTable({
     return airlinePrefix ? `${airlinePrefix}${user.callsign}` : user.callsign;
   }
 
-  function getStatusLabel(user: User & { isInactive?: boolean | number }) {
+  function getStatusLabel(
+    user: User & { isInactive?: boolean | number; lastFlight?: number | null }
+  ) {
     if (user.banned) {
-      return { label: 'Banned', variant: 'destructive' as const };
+      return { label: 'Removed', variant: 'destructive' as const };
     }
     if (!user.verified) {
       return { label: 'Pending', variant: 'pending' as const };
+    }
+    if (!user.lastFlight) {
+      return { label: 'No Flights', variant: 'info' as const };
     }
     const inactive = Boolean(user.isInactive);
     if (inactive) {

@@ -192,6 +192,8 @@ const main = async () => {
   }
 
   logger.info('🚀 Starting to seed dynamic data...');
+  const nowMs = Date.now();
+  const daysToMs = (days: number) => days * 24 * 60 * 60 * 1000;
   await seed(
     db,
     {
@@ -251,8 +253,9 @@ const main = async () => {
           { weight: 0.95, value: f.default({ defaultValue: null }) },
           { weight: 0.05, value: f.default({ defaultValue: 'admin' }) },
         ]),
-        createdAt: f.default({
-          defaultValue: new Date(Date.now()),
+        createdAt: f.date({
+          minDate: new Date(nowMs - daysToMs(120)),
+          maxDate: new Date(nowMs),
         }),
       },
       with: {
@@ -267,8 +270,9 @@ const main = async () => {
         id: f.uuid(),
         accountId: f.uuid(),
         providerId: f.default({ defaultValue: 'credentials' }),
-        createdAt: f.default({
-          defaultValue: new Date(Date.now()),
+        createdAt: f.date({
+          minDate: new Date(nowMs - daysToMs(120)),
+          maxDate: new Date(nowMs),
         }),
       },
     },
@@ -298,7 +302,7 @@ const main = async () => {
           ],
         }),
         createdAt: f.default({
-          defaultValue: new Date(Date.now()),
+          defaultValue: new Date(nowMs),
         }),
       },
     },
@@ -328,9 +332,9 @@ const main = async () => {
         id: f.uuid(),
         flightNumber: f.valuesFromArray({ values: flightNumbers }),
         date: f.date({
-          minDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-          maxDate: new Date(),
-        }), // Sometime in the last year
+          minDate: new Date(nowMs - daysToMs(45)),
+          maxDate: new Date(nowMs),
+        }), // Sometime in the last ~45 days
         departureIcao: f.valuesFromArray({ values: airportIcaos }),
         arrivalIcao: f.valuesFromArray({ values: airportIcaos }),
         flightTime: f.int({ minValue: 60, maxValue: 15 * 60 }),

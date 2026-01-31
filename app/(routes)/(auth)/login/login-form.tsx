@@ -67,7 +67,7 @@ export function LoginForm({
       setIsError(false);
     } else if (reason === 'banned') {
       setErrorMessage(
-        'Your account has been banned. Please contact an administrator for more information.'
+        'Your account has been removed from the VA. Please contact an administrator for more information.'
       );
       setIsError(false);
     }
@@ -103,12 +103,12 @@ export function LoginForm({
 
       if (error) {
         if (error.status === 403) {
-          // Check if this is a ban error by looking at the error message
+          // Check if this is a removal error by looking at the error message
           if (
             error.message?.includes('banned') ||
             error.message?.includes('ban')
           ) {
-            // Redirect to login with banned reason
+            // Redirect to login with removed reason
             router.push('/login?reason=banned');
             return;
           } else {

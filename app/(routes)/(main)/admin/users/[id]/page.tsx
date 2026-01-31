@@ -157,11 +157,13 @@ export default async function AdminUserDetailPage({
                 targetUserId={user.id}
                 targetUserName={user.name || 'Unnamed User'}
               />
-              <KickUserDialog
-                userId={user.id}
-                userName={user.name || 'Unnamed User'}
-                canKick={canKickOrBan}
-              />
+              {canTransferOwnership && (
+                <TransferOwnershipDialog
+                  userId={user.id}
+                  userName={user.name || 'Unnamed User'}
+                  canTransfer={canTransferOwnership}
+                />
+              )}
               <BanUserDialog
                 userId={user.id}
                 userName={user.name || 'Unnamed User'}
@@ -170,13 +172,11 @@ export default async function AdminUserDetailPage({
                 banExpires={user.banExpires ? new Date(user.banExpires) : null}
                 canBan={canKickOrBan}
               />
-              {canTransferOwnership && (
-                <TransferOwnershipDialog
-                  userId={user.id}
-                  userName={user.name || 'Unnamed User'}
-                  canTransfer={canTransferOwnership}
-                />
-              )}
+              <KickUserDialog
+                userId={user.id}
+                userName={user.name || 'Unnamed User'}
+                canKick={canKickOrBan}
+              />
               <ResetPasswordDialog
                 userId={user.id}
                 userName={user.name || 'Unnamed User'}

@@ -15,7 +15,7 @@ export async function unbanUser(userId: string) {
   }
 
   if (!existingUser[0].banned) {
-    throw new Error('User is not banned');
+    throw new Error('User is not removed');
   }
 
   await db

@@ -44,7 +44,7 @@ export function KickUserDialog({
         }
       },
       onError: ({ error }) => {
-        toast.error(error.serverError || 'Failed to delete user');
+        toast.error(error.serverError || 'Failed to delete account');
       },
     }
   );
@@ -62,7 +62,7 @@ export function KickUserDialog({
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <UserMinus className="h-4 w-4" />
-          Remove from the VA
+          Delete Account
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -72,7 +72,7 @@ export function KickUserDialog({
         transitionFrom="bottom-left"
       >
         <DialogHeader>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle>Delete Account</DialogTitle>
           <DialogDescription>
             Are you sure you want to <strong>permanently delete</strong>{' '}
             <strong>{userName}</strong>? This will{' '}
@@ -91,7 +91,7 @@ export function KickUserDialog({
 
         <ResponsiveDialogFooter
           primaryButton={{
-            label: 'Delete User',
+            label: 'Delete Account',
             onClick: handleKick,
             disabled: isKicking,
             loading: isKicking,

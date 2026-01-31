@@ -16,6 +16,7 @@ const badgeVariants = cva(
         pirep: 'border-transparent bg-muted text-muted-foreground',
         destructive:
           'border-transparent bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
+        info: 'border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] [a&]:hover:opacity-90',
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         pending:

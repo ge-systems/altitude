@@ -11,8 +11,8 @@ const banUserSchema = z.object({
   userId: z.string().min(1, 'User ID is required'),
   reason: z
     .string()
-    .min(1, 'Reason is required')
-    .max(500, 'Reason must be less than 500 characters'),
+    .max(500, 'Reason must be less than 500 characters')
+    .optional(),
   expiresAt: z.date().optional(),
 });
 
@@ -20,20 +20,24 @@ export const banUserAction = createRoleActionClient(['users'])
   .inputSchema(banUserSchema)
   .action(async ({ parsedInput, ctx }) => {
     const { userId, reason, expiresAt } = parsedInput;
+    const normalizedReason =
+      typeof reason === 'string' && reason.trim().length > 0
+        ? reason.trim()
+        : null;
 
     try {
-      await banUser(userId, reason, expiresAt, ctx.userRoles);
+      await banUser(userId, normalizedReason, expiresAt, ctx.userRoles);
 
       revalidatePath('/admin/users');
       revalidatePath(`/admin/users/${userId}`);
 
       return {
         success: true,
-        message: 'User banned successfully',
+        message: 'User removed from the VA successfully',
       };
     } catch (error) {
       handleDbError(error, {
-        fallback: 'Failed to ban user',
+        fallback: 'Failed to remove user from the VA',
       });
     }
   });

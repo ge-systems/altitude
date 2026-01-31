@@ -24,11 +24,11 @@ export const unbanUserAction = createRoleActionClient(['users'])
 
       return {
         success: true,
-        message: 'User unbanned successfully',
+        message: 'User access restored successfully',
       };
     } catch (error) {
       handleDbError(error, {
-        fallback: 'Failed to unban user',
+        fallback: 'Failed to restore access',
       });
     }
   });

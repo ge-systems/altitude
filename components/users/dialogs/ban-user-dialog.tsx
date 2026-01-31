@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { Ban, CalendarIcon, UserX } from 'lucide-react';
+import { CalendarIcon, UserX } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -40,10 +40,7 @@ import { useResponsiveDialog } from '@/hooks/use-responsive-dialog';
 import { cn } from '@/lib/utils';
 
 const banFormSchema = z.object({
-  reason: z
-    .string()
-    .min(1, 'Reason is required')
-    .max(500, 'Reason must be less than 500 characters'),
+  reason: z.string().max(500, 'Reason must be less than 500 characters'),
   expiresAt: z.date().optional(),
 });
 
@@ -92,7 +89,7 @@ export function BanUserDialog({
         }
       },
       onError: ({ error }) => {
-        toast.error(error.serverError || 'Failed to ban user');
+        toast.error(error.serverError || 'Failed to remove user');
       },
     }
   );
@@ -107,7 +104,7 @@ export function BanUserDialog({
         }
       },
       onError: ({ error }) => {
-        toast.error(error.serverError || 'Failed to unban user');
+        toast.error(error.serverError || 'Failed to restore access');
       },
     }
   );
@@ -140,7 +137,7 @@ export function BanUserDialog({
             className="text-green-600 hover:text-green-700"
           >
             <UserX className="h-4 w-4" />
-            Unban User
+            Restore Access
           </Button>
         </DialogTrigger>
         <DialogContent
@@ -150,21 +147,22 @@ export function BanUserDialog({
           transitionFrom="bottom-left"
         >
           <DialogHeader>
-            <DialogTitle>Unban User</DialogTitle>
+            <DialogTitle>Restore Access</DialogTitle>
             <DialogDescription>
-              Are you sure you want to unban <strong>{userName}</strong>?
+              Are you sure you want to restore access for{' '}
+              <strong>{userName}</strong>?
             </DialogDescription>
           </DialogHeader>
 
           {currentBanReason && (
             <div className="space-y-2">
-              <p className="text-sm font-medium">Current ban reason:</p>
+              <p className="text-sm font-medium">Current removal reason:</p>
               <p className="text-sm text-muted-foreground bg-muted p-3 rounded whitespace-pre-wrap break-all">
                 {currentBanReason}
               </p>
               {banExpires && (
                 <p className="text-sm text-muted-foreground">
-                  Ban expires: {format(banExpires, 'PPP')}
+                  Removal expires: {format(banExpires, 'PPP')}
                 </p>
               )}
             </div>
@@ -172,11 +170,11 @@ export function BanUserDialog({
 
           <ResponsiveDialogFooter
             primaryButton={{
-              label: 'Unban User',
+              label: 'Restore Access',
               onClick: handleUnban,
               disabled: isLoading,
               loading: isUnbanning,
-              loadingLabel: 'Unbanning...',
+              loadingLabel: 'Restoring...',
               className: 'bg-green-600 hover:bg-green-700 text-white',
             }}
             secondaryButton={{
@@ -197,8 +195,8 @@ export function BanUserDialog({
           size="sm"
           className="bg-orange-600 hover:bg-orange-700 text-white"
         >
-          <Ban className="h-4 w-4" />
-          Ban from the VA
+          <UserX className="h-4 w-4" />
+          Remove from the VA
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -208,10 +206,11 @@ export function BanUserDialog({
         transitionFrom="bottom-left"
       >
         <DialogHeader>
-          <DialogTitle>Ban User</DialogTitle>
+          <DialogTitle>Remove from VA</DialogTitle>
           <DialogDescription>
-            Ban <strong>{userName}</strong> from the platform. This will prevent
-            them from logging in.
+            Remove <strong>{userName}</strong> from the VA. This will prevent
+            them from logging in until access is restored or the removal
+            expires.
           </DialogDescription>
         </DialogHeader>
 
@@ -223,14 +222,14 @@ export function BanUserDialog({
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center justify-between">
-                    <FormLabel>Reason for ban *</FormLabel>
+                    <FormLabel>Reason (optional)</FormLabel>
                     <span className="text-xs text-muted-foreground">
                       {reasonValue.length} / 500
                     </span>
                   </div>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter the reason for banning this user..."
+                      placeholder="Add a note about this removal (optional)"
                       className="resize-none"
                       maxLength={500}
                       {...field}
@@ -246,7 +245,7 @@ export function BanUserDialog({
               name="expiresAt"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Ban expires (optional)</FormLabel>
+                  <FormLabel>Removal expires (optional)</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -285,10 +284,10 @@ export function BanUserDialog({
 
             <ResponsiveDialogFooter
               primaryButton={{
-                label: 'Ban User',
+                label: 'Remove from VA',
                 disabled: isLoading,
                 loading: isBanning,
-                loadingLabel: 'Banning...',
+                loadingLabel: 'Removing...',
                 type: 'submit',
                 className: 'bg-orange-600 hover:bg-orange-700 text-white',
               }}

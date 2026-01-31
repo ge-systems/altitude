@@ -23,11 +23,11 @@ export const kickUserAction = createRoleActionClient(['users'])
 
       return {
         success: true,
-        message: 'User deleted successfully',
+        message: 'Account deleted successfully',
       };
     } catch (error) {
       handleDbError(error, {
-        fallback: 'Failed to delete user',
+        fallback: 'Failed to delete account',
       });
     }
   });

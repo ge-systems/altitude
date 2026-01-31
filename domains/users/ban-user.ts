@@ -6,7 +6,7 @@ import { ADMIN_ROLE, OWNER_ROLE, parseRolesField } from '@/lib/roles';
 
 export async function banUser(
   userId: string,
-  reason: string,
+  reason: string | null,
   expiresAt: Date | undefined,
   actorRoles: string[]
 ) {
@@ -21,20 +21,20 @@ export async function banUser(
   }
 
   if (existingUser[0].banned) {
-    throw new Error('User is already banned');
+    throw new Error('User is already removed');
   }
 
   const targetRoles = parseRolesField(existingUser[0].role);
 
   // No one can ban the owner
   if (targetRoles.includes(OWNER_ROLE)) {
-    throw new Error("You can't ban the owner");
+    throw new Error("You can't remove the owner");
   }
 
   // Only the owner can ban admins
   const actorIsOwner = actorRoles.includes(OWNER_ROLE);
   if (targetRoles.includes(ADMIN_ROLE) && !actorIsOwner) {
-    throw new Error('Only the owner can ban admins');
+    throw new Error('Only the owner can remove admins');
   }
 
   await db
